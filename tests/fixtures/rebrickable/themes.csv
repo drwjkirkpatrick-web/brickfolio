@@ -1,0 +1,6 @@
+id,name,parent_id
+1,Basic,
+158,City,
+159,City Vehicles,158
+171,Star Wars,
+501,Ultimate Collector Series,171

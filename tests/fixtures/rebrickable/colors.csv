@@ -1,0 +1,8 @@
+id,name,rgb,is_trans
+-1,Unknown,05131D,f
+0,Black,05131D,f
+1,Blue,0055BF,f
+4,Red,C91A09,f
+14,Yellow,F2CD37,f
+15,White,F2F3F2,f
+36,Trans-Red,C91A09,t
