@@ -27,15 +27,19 @@ inventory, and present — plus LLM-generate — builds possible from those part
 - [x] CLI wiring — `builds list|search|show`, `photo scan` (parent, 34cb80b)
 - [x] Prompt 5 — recommender & reports: coverage bars, READY flags, missing lists (ec8a36a)
 - [x] Prompt 9 — constrained generator: ChatClient, repair loop, tests (ca1a029)
-- [x] CLI wiring — `builds recommend`, `generate` (parent, a4da7f7)
+- [x] Prompt 10 — pipeline: offline demo, Rebrickable export, tests (3a9b0c1)
+- [x] CLI wiring — `demo`, `inventory export` (parent, 9fe72d8)
+- [x] README (Phosphorus voice) + LICENSE (MIT)
 - [x] GitHub remote — github.com/drwjkirkpatrick-web/brickfolio (public), `main` pushed
 
 ### In Progress
-- [ ] Prompt 10 — pipeline module (subagent running); parent: `demo`+`inventory export` wiring, README, LICENSE
+(none — 10/10 prompts shipped)
 
-### Not Started
-- [ ] Prompt 10 — pipeline, export, docs
-- [ ] CLI wiring (parent): `builds recommend` (with P5), `generate` (with P9)
+### Backlog (v0.2 ideas)
+- Real pile detector: YOLO on synthetic LDraw pile renders (plugs into the Detector ABC)
+- Surface `color_substituted` ("buildable, but swapped colors") next to READY
+- `demo --mode/--top` flags (currently module constants)
+- Import LDraw OMR / BrickHub models as extra build candidates
 
 ## 3. Architecture & Key Decisions
 
@@ -56,7 +60,7 @@ inventory, and present — plus LLM-generate — builds possible from those part
 
 ## 5. Next Step (only ONE)
 
-> **Next:** P5 lands → wire `builds recommend`; P9 lands → wire `generate`; then P10 (pipeline, export, README, LICENSE).
+> **Next:** None — the 10-prompt plan is complete. Pick from the v0.2 backlog.
 
 ## 6. Environment & Tooling Notes
 
@@ -71,7 +75,8 @@ inventory, and present — plus LLM-generate — builds possible from those part
 - 2026-10-17: Wave A landed 2/4/6 — verified 118 tests green on disk, committed per prompt; P8 finishing; dispatched P3+P7.
 - 2026-10-17: Wave A complete — P8 verified (36 tests) & committed; wired catalog+photo CLI; dispatched P9.
 - 2026-10-17: Created GitHub repo (public) and pushed `main` (7 commits).
-- 2026-10-17: P7 verified (41 tests + 3 Pillow-skips) & pushed; wired builds+photo-scan CLI (19 CLI tests); suite 194 passed. P5+P9 running.
+- 2026-10-17: P5 verified & pushed; wired recommend+generate CLI; suite 258.
+- 2026-10-17: P10 verified (12 tests) & pushed; wired demo+export; README (Phosphorus) + LICENSE; suite 272 passed, 3 skipped — plan complete.
 
 ## 8. References
 
