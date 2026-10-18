@@ -22,11 +22,12 @@ inventory, and present — plus LLM-generate — builds possible from those part
 - [x] Prompt 6 — Brickognize client: multipart POST, defensive parsing, fixtures (fecf7e9)
 - [x] Prompt 8 — LDraw parser + validator: mpd flattening, collisions, fixtures (f9e4022)
 - [x] CLI wiring — `catalog import|stats`, `photo identify` (parent)
+- [x] Prompt 3 — build catalog: builds over set inventories, search, tests (dff618e)
 - [x] GitHub remote — github.com/drwjkirkpatrick-web/brickfolio (public), `main` pushed
 
 ### In Progress
-- [ ] Prompt 3 — build catalog (subagent running)
-- [ ] Prompt 7 — scan sessions (subagent running)
+- [ ] Prompt 5 — recommender & reports (subagent dispatched; deps P3+P4 committed)
+- [ ] Prompt 7 — scan sessions (subagent running; self-repairing its test bugs)
 - [ ] Prompt 9 — constrained generator (subagent dispatched; dep P8 committed)
 
 ### Not Started
