@@ -22,6 +22,7 @@ inventory, and present — plus LLM-generate — builds possible from those part
 - [x] Prompt 6 — Brickognize client: multipart POST, defensive parsing, fixtures (fecf7e9)
 - [x] Prompt 8 — LDraw parser + validator: mpd flattening, collisions, fixtures (f9e4022)
 - [x] CLI wiring — `catalog import|stats`, `photo identify` (parent)
+- [x] GitHub remote — github.com/drwjkirkpatrick-web/brickfolio (public), `main` pushed
 
 ### In Progress
 - [ ] Prompt 3 — build catalog (subagent running)
@@ -32,7 +33,6 @@ inventory, and present — plus LLM-generate — builds possible from those part
 - [ ] Prompt 5 — recommender & reports (after 3)
 - [ ] Prompt 10 — pipeline, export, docs
 - [ ] CLI wiring (parent): `builds list|search|recommend`, `photo scan`, `generate`
-- [ ] GitHub remote (name/visibility to confirm with Walker)
 
 ## 3. Architecture & Key Decisions
 
@@ -67,6 +67,7 @@ inventory, and present — plus LLM-generate — builds possible from those part
 - 2026-10-17: Researched landscape → 10 prompts authored → Prompt 1 built & committed.
 - 2026-10-17: Wave A landed 2/4/6 — verified 118 tests green on disk, committed per prompt; P8 finishing; dispatched P3+P7.
 - 2026-10-17: Wave A complete — P8 verified (36 tests) & committed; wired catalog+photo CLI; dispatched P9.
+- 2026-10-17: Created GitHub repo (public) and pushed `main` (7 commits).
 
 ## 8. References
 
