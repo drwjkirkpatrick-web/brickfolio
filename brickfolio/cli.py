@@ -24,6 +24,7 @@ from .generator import generate_build
 from .importer import import_catalog
 from .llm import ChatClient
 from .models import InventoryItem
+from .report import recommend_builds, render_recommendations
 from .vision.brickognize import BrickognizeError, identify_part
 from .vision.detector import DetectorError, ManualRegionsDetector, StaticDetector
 from .vision.session import ScanSession
@@ -82,6 +83,15 @@ def build_parser() -> argparse.ArgumentParser:
     srch_p.add_argument("--limit", type=int, default=20)
     show_p = builds_sub.add_parser("show", help="Show a build and its parts list")
     show_p.add_argument("build_num")
+
+    rec_p = builds_sub.add_parser(
+        "recommend", help="What can I build with the parts I have?"
+    )
+    rec_p.add_argument("--mode", default="shape", choices=["exact", "shape"])
+    rec_p.add_argument("--top", type=int, default=10)
+    rec_p.add_argument(
+        "--verbose", action="store_true", help="Show top missing-part lines per build"
+    )
 
     # photo (Prompts 6+7) ----------------------------------------------------------
     photo = sub.add_parser("photo", help="Identify parts from photos")
@@ -223,6 +233,18 @@ def cmd_builds(args, db: Database) -> int:
             for p in parts:
                 spare = "spare" if p.is_spare else ""
                 print(f"{p.part_num:<10} {p.color_id:<8} {p.quantity:>4}  {spare}")
+        return 0
+
+    if args.builds_command == "recommend":
+        ranked = recommend_builds(db, mode=args.mode, top=args.top)
+        if not ranked:
+            print(
+                "No builds in the catalog yet. "
+                "Try: brickfolio catalog import --dir PATH"
+            )
+            return 0
+        # NOTE: render_recommendations already ends with a newline.
+        print(render_recommendations(ranked, verbose=args.verbose), end="")
         return 0
 
     return 1

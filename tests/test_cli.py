@@ -345,3 +345,52 @@ def test_generate_llm_error(tmp_path, capsys, monkeypatch):
 
     assert run(db_path, "generate", "a tiny car") == 1
     assert "LLM call failed" in capsys.readouterr().out
+
+
+# ---- builds recommend (Prompt 5 wiring) ---------------------------------------
+
+
+def test_builds_recommend_empty_catalog_hint(tmp_path, capsys):
+    assert run(tmp_path / "cli.db", "builds", "recommend") == 0
+    assert "No builds" in capsys.readouterr().out
+
+
+def test_builds_recommend_ready_build(tmp_path, capsys):
+    from brickfolio.builds import build_parts, iter_builds
+    from brickfolio.db import Database
+    from brickfolio.models import InventoryItem
+
+    db_path = tmp_path / "cli.db"
+    assert run(db_path, "catalog", "import", "--dir",
+               str(FIXTURES / "rebrickable")) == 0
+    db = Database(db_path)
+    first = next(iter_builds(db))
+    for bp in build_parts(db, first.build_num):
+        if not bp.is_spare:
+            db.add_user_parts(
+                [InventoryItem(bp.part_num, bp.color_id, bp.quantity)]
+            )
+    db.close()
+    capsys.readouterr()
+
+    assert run(db_path, "builds", "recommend", "--top", "5") == 0
+    out = capsys.readouterr().out
+    assert "READY" in out and first.build_num in out
+
+
+def test_builds_recommend_verbose_missing(tmp_path, capsys):
+    from brickfolio.builds import build_parts, iter_builds
+    from brickfolio.db import Database
+
+    db_path = tmp_path / "cli.db"
+    assert run(db_path, "catalog", "import", "--dir",
+               str(FIXTURES / "rebrickable")) == 0
+    db = Database(db_path)
+    first = next(iter_builds(db))
+    first_part = build_parts(db, first.build_num)[0].part_num
+    db.close()
+    capsys.readouterr()  # inventory stays empty: every part missing
+
+    assert run(db_path, "builds", "recommend", "--verbose", "--top", "10") == 0
+    out = capsys.readouterr().out
+    assert "0%" in out and first.build_num in out and first_part in out
