@@ -1,5 +1,21 @@
 🔥 # brickfolio
 
+[![CI](https://github.com/drwjkirkpatrick-web/brickfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/drwjkirkpatrick-web/brickfolio/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-272%20passed%20%7C%203%20skipped-brightgreen.svg)](#tests)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Dependencies](https://img.shields.io/badge/dependencies-stdlib%20only-brightgreen.svg)](requirements.txt)
+[![Offline-first](https://img.shields.io/badge/network-optional%20(photo%20ID%20%2F%20LLM%20only)-blue.svg)](#data-sources--licenses)
+[![Catalog: Rebrickable](https://img.shields.io/badge/catalog-Rebrickable-orange.svg)](https://rebrickable.com)
+[![Part ID: Brickognize](https://img.shields.io/badge/part%20ID-Brickognize%20API-ffcf00.svg)](https://brickognize.com)
+[![Models: LDraw](https://img.shields.io/badge/models-LDraw%20(.ldr)-red.svg)](https://www.ldraw.org)
+[![Tested on Jetson](https://img.shields.io/badge/tested%20on-Jetson%20ARM64-76B900.svg)](https://developer.nvidia.com/embedded/compute/jetson)
+[![Stars](https://img.shields.io/github/stars/drwjkirkpatrick-web/brickfolio.svg)](https://github.com/drwjkirkpatrick-web/brickfolio/stargazers)
+[![Last commit](https://img.shields.io/github/last-commit/drwjkirkpatrick-web/brickfolio.svg)](https://github.com/drwjkirkpatrick-web/brickfolio/commits/main)
+[![Repo size](https://img.shields.io/github/repo-size/drwjkirkpatrick-web/brickfolio.svg)](https://github.com/drwjkirkpatrick-web/brickfolio)
+[![Issues](https://img.shields.io/github/issues/drwjkirkpatrick-web/brickfolio.svg)](https://github.com/drwjkirkpatrick-web/brickfolio/issues)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/drwjkirkpatrick-web/brickfolio/pulls)
+
 **Point your camera at a pile of loose bricks — and find out what you can build tonight.**
 
 brickfolio is an open-source, offline-first companion for every bin of LEGO
