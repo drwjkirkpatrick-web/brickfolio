@@ -126,8 +126,9 @@ Turn matcher results into human output.
   - `recommend_builds(db, mode="shape", top=10) -> List[RankedBuild]`
     (joins builds.build_parts + matcher).
   - `render_recommendations(ranked, verbose=False) -> str` — per build:
-    name, ASCII coverage bar (10 chars, e.g. `██████░░░░ 72%`), `READY`
-    flag at 100%, and with `verbose=True` the top missing-part lines.
+    name, ASCII coverage bar (10 chars; floored fill — `███████░░░ 72%`,
+    only 100% renders a full bar), `READY` flag at 100%, and with
+    `verbose=True` the top missing-part lines.
   - `render_missing_list(ranked_build) -> str` — full shopping list:
     part, color, needed, have.
 - Tests against a fixture db: expected names/percentages present; READY
