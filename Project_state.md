@@ -25,11 +25,13 @@ inventory, and present — plus LLM-generate — builds possible from those part
 - [x] Prompt 3 — build catalog: builds over set inventories, search, tests (dff618e)
 - [x] Prompt 7 — scan sessions: detector ABC, session workflow, tests (a58ea89)
 - [x] CLI wiring — `builds list|search|show`, `photo scan` (parent, 34cb80b)
+- [x] Prompt 5 — recommender & reports: coverage bars, READY flags, missing lists (ec8a36a)
+- [x] Prompt 9 — constrained generator: ChatClient, repair loop, tests (ca1a029)
+- [x] CLI wiring — `builds recommend`, `generate` (parent, a4da7f7)
 - [x] GitHub remote — github.com/drwjkirkpatrick-web/brickfolio (public), `main` pushed
 
 ### In Progress
-- [ ] Prompt 5 — recommender & reports (subagent running)
-- [ ] Prompt 9 — constrained generator (subagent running)
+- [ ] Prompt 10 — pipeline module (subagent running); parent: `demo`+`inventory export` wiring, README, LICENSE
 
 ### Not Started
 - [ ] Prompt 10 — pipeline, export, docs

@@ -375,7 +375,7 @@ def test_builds_recommend_ready_build(tmp_path, capsys):
 
     assert run(db_path, "builds", "recommend", "--top", "5") == 0
     out = capsys.readouterr().out
-    assert "READY" in out and first.build_num in out
+    assert "READY" in out and first.name in out  # render shows names, not IDs
 
 
 def test_builds_recommend_verbose_missing(tmp_path, capsys):
@@ -393,4 +393,4 @@ def test_builds_recommend_verbose_missing(tmp_path, capsys):
 
     assert run(db_path, "builds", "recommend", "--verbose", "--top", "10") == 0
     out = capsys.readouterr().out
-    assert "0%" in out and first.build_num in out and first_part in out
+    assert "0%" in out and first.name in out and first_part in out
