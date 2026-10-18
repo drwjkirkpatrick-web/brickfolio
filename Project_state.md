@@ -23,17 +23,17 @@ inventory, and present — plus LLM-generate — builds possible from those part
 - [x] Prompt 8 — LDraw parser + validator: mpd flattening, collisions, fixtures (f9e4022)
 - [x] CLI wiring — `catalog import|stats`, `photo identify` (parent)
 - [x] Prompt 3 — build catalog: builds over set inventories, search, tests (dff618e)
+- [x] Prompt 7 — scan sessions: detector ABC, session workflow, tests (a58ea89)
+- [x] CLI wiring — `builds list|search|show`, `photo scan` (parent, 34cb80b)
 - [x] GitHub remote — github.com/drwjkirkpatrick-web/brickfolio (public), `main` pushed
 
 ### In Progress
-- [ ] Prompt 5 — recommender & reports (subagent dispatched; deps P3+P4 committed)
-- [ ] Prompt 7 — scan sessions (subagent running; self-repairing its test bugs)
-- [ ] Prompt 9 — constrained generator (subagent dispatched; dep P8 committed)
+- [ ] Prompt 5 — recommender & reports (subagent running)
+- [ ] Prompt 9 — constrained generator (subagent running)
 
 ### Not Started
-- [ ] Prompt 5 — recommender & reports (after 3)
 - [ ] Prompt 10 — pipeline, export, docs
-- [ ] CLI wiring (parent): `builds list|search|recommend`, `photo scan`, `generate`
+- [ ] CLI wiring (parent): `builds recommend` (with P5), `generate` (with P9)
 
 ## 3. Architecture & Key Decisions
 
@@ -54,7 +54,7 @@ inventory, and present — plus LLM-generate — builds possible from those part
 
 ## 5. Next Step (only ONE)
 
-> **Next:** Prompt 3 lands → dispatch P5; Prompt 9 lands → wire `generate` + `builds`/`photo scan` CLI; P10 last.
+> **Next:** P5 lands → wire `builds recommend`; P9 lands → wire `generate`; then P10 (pipeline, export, README, LICENSE).
 
 ## 6. Environment & Tooling Notes
 
@@ -69,6 +69,7 @@ inventory, and present — plus LLM-generate — builds possible from those part
 - 2026-10-17: Wave A landed 2/4/6 — verified 118 tests green on disk, committed per prompt; P8 finishing; dispatched P3+P7.
 - 2026-10-17: Wave A complete — P8 verified (36 tests) & committed; wired catalog+photo CLI; dispatched P9.
 - 2026-10-17: Created GitHub repo (public) and pushed `main` (7 commits).
+- 2026-10-17: P7 verified (41 tests + 3 Pillow-skips) & pushed; wired builds+photo-scan CLI (19 CLI tests); suite 194 passed. P5+P9 running.
 
 ## 8. References
 
