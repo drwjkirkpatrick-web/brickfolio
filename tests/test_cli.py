@@ -45,10 +45,8 @@ def test_empty_inventory_lists_friendly_hint(tmp_path, capsys):
 
 
 def test_stub_commands_report_pending(tmp_path, capsys):
-    for cmd in ("generate", "demo"):
-        assert run(tmp_path / "stub.db", cmd) == 0
-    out = capsys.readouterr().out
-    assert out.count("not implemented yet") == 2
+    assert run(tmp_path / "stub.db", "demo") == 0
+    assert capsys.readouterr().out.count("not implemented yet") == 1
 
 
 # ---- catalog (Prompt 2 wiring) ---------------------------------------------
@@ -258,3 +256,92 @@ def test_photo_scan_saves_session(tmp_path, capsys, monkeypatch):
     assert "Session saved" in out
     payload = json.loads(session_path.read_text())
     assert payload["photos"][0]["candidates"][0]["part_num"] == "3001"
+
+
+# ---- generate (Prompt 9 wiring) ------------------------------------------------
+
+VALID_LDR = "1 4 0 0 0 1 0 0 0 1 0 0 0 1 3004.dat"
+BAD_LDR = "1 4 0 0 0 1 0 0 0 1 0 0 0 1 9999.dat"  # 9999 is not in stock
+
+
+class _FakeGenerateClient:
+    """ChatClient stand-in: scripted replies, no network."""
+
+    def __init__(self, base_url=None, model=None, timeout=60, opener=None,
+                 replies=None):
+        self.replies = list(replies or [VALID_LDR])
+        self.seen_messages = None
+
+    def chat(self, messages, temperature=0.6):
+        self.seen_messages = messages
+        return self.replies.pop(0) if self.replies else VALID_LDR
+
+
+def _stock_db(path):
+    assert run(path, "inventory", "add", "3004", "4", "2") == 0
+    return path
+
+
+def test_generate_empty_inventory(tmp_path, capsys):
+    assert run(tmp_path / "cli.db", "generate", "a tiny car") == 1
+    assert "Inventory is empty" in capsys.readouterr().out
+
+
+def test_generate_writes_valid_model(tmp_path, capsys, monkeypatch):
+    import brickfolio.cli as cli_mod
+
+    fake = _FakeGenerateClient()
+    monkeypatch.setattr(cli_mod, "ChatClient", lambda **kw: fake)
+    db_path = _stock_db(tmp_path / "cli.db")
+    capsys.readouterr()
+
+    out_path = tmp_path / "car.ldr"
+    assert run(db_path, "generate", "a tiny car", "--out", str(out_path)) == 0
+    out = capsys.readouterr().out
+    assert "VALID" in out and "3004" in out and "Model written" in out
+    text = out_path.read_text()
+    assert "brickfolio:" in text and "3004.dat" in text and "1 4" in text
+
+
+def test_generate_repair_round_then_valid(tmp_path, capsys, monkeypatch):
+    import brickfolio.cli as cli_mod
+
+    fake = _FakeGenerateClient(replies=[BAD_LDR, VALID_LDR])
+    monkeypatch.setattr(cli_mod, "ChatClient", lambda **kw: fake)
+    db_path = _stock_db(tmp_path / "cli.db")
+    capsys.readouterr()
+
+    assert run(db_path, "generate", "a tiny car", "--rounds", "2") == 0
+    out = capsys.readouterr().out
+    assert "VALID" in out and "2 round(s)" in out
+    # the repair prompt quoted the validator's own error back to the LLM
+    assert any("9999" in m.get("content", "") for m in fake.seen_messages)
+
+
+def test_generate_exhausts_rounds_invalid(tmp_path, capsys, monkeypatch):
+    import brickfolio.cli as cli_mod
+
+    fake = _FakeGenerateClient(replies=[BAD_LDR, BAD_LDR])
+    monkeypatch.setattr(cli_mod, "ChatClient", lambda **kw: fake)
+    db_path = _stock_db(tmp_path / "cli.db")
+    capsys.readouterr()
+
+    assert run(db_path, "generate", "a tiny car", "--rounds", "2") == 1
+    out = capsys.readouterr().out
+    assert "INVALID" in out and "9999" in out
+
+
+def test_generate_llm_error(tmp_path, capsys, monkeypatch):
+    import brickfolio.cli as cli_mod
+    from brickfolio.llm import LLMError
+
+    class DeadClient(_FakeGenerateClient):
+        def chat(self, messages, temperature=0.6):
+            raise LLMError("connection refused")
+
+    monkeypatch.setattr(cli_mod, "ChatClient", lambda **kw: DeadClient())
+    db_path = _stock_db(tmp_path / "cli.db")
+    capsys.readouterr()
+
+    assert run(db_path, "generate", "a tiny car") == 1
+    assert "LLM call failed" in capsys.readouterr().out

@@ -4,7 +4,7 @@ NOTE: Wiring plan — each later prompt gains its commands here:
   Prompt 2:    catalog import|stats            (wired)
   Prompts 3+5: builds list|search|show|recommend (list/search/show wired; recommend lands with P5)
   Prompts 6+7: photo identify|scan             (wired)
-  Prompt 9:    generate                        (pending)
+  Prompt 9:    generate                        (wired)
   Prompt 10:   demo + export                   (pending)
 This file is parent-owned (shared-file rule); subagents request wiring in
 their summaries instead of editing it.
@@ -20,7 +20,9 @@ from typing import List, Optional
 
 from .builds import build_parts, get_build, iter_builds, search_builds
 from .db import Database
+from .generator import generate_build
 from .importer import import_catalog
+from .llm import ChatClient
 from .models import InventoryItem
 from .vision.brickognize import BrickognizeError, identify_part
 from .vision.detector import DetectorError, ManualRegionsDetector, StaticDetector
@@ -109,10 +111,25 @@ def build_parser() -> argparse.ArgumentParser:
         "--session", default=None, help="Save the review session to this JSON path"
     )
 
-    # stubs for later prompts -----------------------------------------------------
-    sub.add_parser(
-        "generate", help="Generate builds constrained to your parts (Prompt 9)"
+    # generate (Prompt 9) --------------------------------------------------------
+    gen = sub.add_parser(
+        "generate", help="Generate a build constrained to your parts (local LLM)"
     )
+    gen.add_argument("theme")
+    gen.add_argument("--rounds", type=int, default=3)
+    gen.add_argument("--mode", default="exact", choices=["exact", "shape"])
+    gen.add_argument(
+        "--base-url", default=None,
+        help="OpenAI-compatible server URL (env BRICKFOLIO_LLM_BASE_URL)",
+    )
+    gen.add_argument(
+        "--model", default=None, help="Model name (env BRICKFOLIO_LLM_MODEL)"
+    )
+    gen.add_argument(
+        "--out", default=None, help="Write the generated LDraw model to this file"
+    )
+
+    # stubs for later prompts -----------------------------------------------------
     sub.add_parser("demo", help="Run the end-to-end demo (Prompt 10)")
 
     return parser
@@ -291,6 +308,61 @@ def cmd_photo(args, db: Database) -> int:
     return 1
 
 
+def _fmt_num(value: float) -> str:
+    """LDraw numbers without trailing noise: 24.0 -> '24', 0.5 -> '0.5'."""
+    if float(value).is_integer():
+        return str(int(value))
+    return f"{value:.6f}".rstrip("0").rstrip(".")
+
+
+def _serialize_ldr(model) -> str:
+    """Render a parsed LDrawModel back to type-1 lines (LeoCAD/LPub3D-openable).
+
+    NOTE: rebuilt from the *validated* parts — the checked geometry is the
+    source of truth, not the LLM's raw prose. The 4th matrix row is emitted
+    as the standard '0 0 1'.
+    """
+    lines = [f"0 brickfolio: {model.name}"]
+    for part in model.parts:
+        x, y, z = part.position
+        values = " ".join(_fmt_num(v) for v in (x, y, z))
+        values += " " + " ".join(_fmt_num(v) for row in part.matrix for v in row)
+        lines.append(f"1 {part.color_id} {values} 0 0 1 {part.part_num}.dat")
+    return "\n".join(lines) + "\n"
+
+
+def cmd_generate(args, db: Database) -> int:
+    inventory = db.list_user_parts()
+    if not inventory:
+        print("Inventory is empty — add parts first (or photo scan), then generate.")
+        return 1
+
+    # NOTE: None base-url/model fall through to env BRICKFOLIO_LLM_* then the
+    # local llama-server default baked into ChatClient.
+    client = ChatClient(base_url=args.base_url, model=args.model)
+    result = generate_build(
+        inventory, args.theme, client, max_rounds=args.rounds, mode=args.mode
+    )
+
+    status = "VALID — buildable from your parts" if result.valid else "INVALID"
+    print(f"Generation: {status} ({result.rounds} round(s), mode {args.mode})")
+    if result.usage:
+        print(f"{'Part':<10} {'Color':<8} {'Qty':>4}")
+        for part, color, qty in result.usage:
+            print(f"{part:<10} {color:<8} {qty:>4}")
+    for error in result.errors:
+        print(f"  problem: {error}")
+    if result.valid and result.model is not None:
+        ldr = _serialize_ldr(result.model)
+        if args.out:
+            with open(args.out, "w", encoding="utf-8") as fh:
+                fh.write(ldr)
+            print(f"Model written to {args.out}")
+        else:
+            print(ldr)
+    return 0 if result.valid else 1
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     args = build_parser().parse_args(argv)
     db = Database(args.db)
@@ -303,6 +375,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             return cmd_builds(args, db)
         if args.command == "photo":
             return cmd_photo(args, db)
+        if args.command == "generate":
+            return cmd_generate(args, db)
         print(f"'{args.command}' is not implemented yet — arrives in a later prompt.")
         return 0
     except ValueError as exc:
