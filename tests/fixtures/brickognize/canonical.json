@@ -1,0 +1,41 @@
+{
+  "listing_id": "res-d492bca0",
+  "bounding_box": {
+    "left": 0.0,
+    "upper": 0.0,
+    "right": 320.0,
+    "lower": 240.0,
+    "image_width": 768.0,
+    "image_height": 1024.0,
+    "score": 0.99
+  },
+  "items": [
+    {
+      "id": "3001",
+      "name": "Brick 2 x 4",
+      "img_url": "https://storage.googleapis.com/brickognize-static/thumbnails/v2.22/part/3001/0.webp",
+      "external_sites": [],
+      "category": "Brick",
+      "type": "part",
+      "score": 0.9
+    },
+    {
+      "id": "3010",
+      "name": "Brick 1 x 4",
+      "img_url": "https://storage.googleapis.com/brickognize-static/thumbnails/v2.22/part/3010/0.webp",
+      "external_sites": [],
+      "category": "Brick",
+      "type": "part",
+      "score": 0.42
+    },
+    {
+      "id": "3024",
+      "name": "Plate 1 x 1",
+      "img_url": "https://storage.googleapis.com/brickognize-static/thumbnails/v2.22/part/3024/0.webp",
+      "external_sites": [],
+      "category": "Plate, Modified",
+      "type": "part",
+      "score": 0.13
+    }
+  ]
+}
