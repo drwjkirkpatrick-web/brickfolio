@@ -16,14 +16,22 @@ inventory, and present — plus LLM-generate — builds possible from those part
 ### Done
 - [x] Research: open-source landscape (Brickit closed; Brickognize API; Rebrickable data; LDraw ecosystem)
 - [x] PROMPTS.md — 10-prompt build plan with dependency table
-- [x] Prompt 1 — foundation: models, schema, Database, `inventory` CLI, tests
+- [x] Prompt 1 — foundation: models, schema, Database, `inventory` CLI, tests (19 tests)
+- [x] Prompt 2 — catalog importer: Rebrickable CSV loader, fixtures, tests (c6251e6)
+- [x] Prompt 4 — matcher engine: exact/shape coverage modes, missing-parts, ranking (5427ba7)
+- [x] Prompt 6 — Brickognize client: multipart POST, defensive parsing, fixtures (fecf7e9)
+- [x] Prompt 8 — LDraw parser + validator: mpd flattening, collisions, fixtures (f9e4022)
+- [x] CLI wiring — `catalog import|stats`, `photo identify` (parent)
 
 ### In Progress
-- [ ] Wave A: Prompts 2 (catalog importer), 4 (matcher), 6 (Brickognize), 8 (LDraw parser/validator)
+- [ ] Prompt 3 — build catalog (subagent running)
+- [ ] Prompt 7 — scan sessions (subagent running)
+- [ ] Prompt 9 — constrained generator (subagent dispatched; dep P8 committed)
 
 ### Not Started
-- [ ] Wave B: Prompts 3 (builds), 5 (recommender), 7 (scan sessions), 9 (generator)
+- [ ] Prompt 5 — recommender & reports (after 3)
 - [ ] Prompt 10 — pipeline, export, docs
+- [ ] CLI wiring (parent): `builds list|search|recommend`, `photo scan`, `generate`
 - [ ] GitHub remote (name/visibility to confirm with Walker)
 
 ## 3. Architecture & Key Decisions
@@ -41,21 +49,24 @@ inventory, and present — plus LLM-generate — builds possible from those part
 
 - **Risk:** Brickognize API response shape may drift → isolated in one module; defensive parser; mocked tests.
 - **Risk:** pile-level detection is unsolved in open source → v1 identifies per-photo; detector ABC leaves the seam.
+- **Watch:** `write_file` timed out once on this Jetson (Project_state.md) — retry once, fall back to terminal write.
 
 ## 5. Next Step (only ONE)
 
-> **Next:** Wave A subagents (Prompts 2, 4, 6, 8) land → parent verifies suite, wires CLI, commits per prompt.
+> **Next:** Prompt 3 lands → dispatch P5; Prompt 9 lands → wire `generate` + `builds`/`photo scan` CLI; P10 last.
 
 ## 6. Environment & Tooling Notes
 
 - Python 3.14; project venv `.venv`; tests: `.venv/bin/python -m pytest -q`
 - DB default: `data/brickfolio.db` (gitignored); tests use tmp_path DBs
 - Shared files parent-owned: `models.py`, `db.py`, `cli.py`, README, Project_state, PROMPTS
-- Skill: software-development-workflows (prompts-first build pattern)
+- Skill: software-development-workflows (prompts-first build pattern); delegation.child_timeout_seconds=1800
 
 ## 7. Recent Session Log
 
-- 2026-10-17: Researched open-source landscape → 10 prompts authored → Prompt 1 built & committed → Wave A dispatched (2, 4, 6, 8).
+- 2026-10-17: Researched landscape → 10 prompts authored → Prompt 1 built & committed.
+- 2026-10-17: Wave A landed 2/4/6 — verified 118 tests green on disk, committed per prompt; P8 finishing; dispatched P3+P7.
+- 2026-10-17: Wave A complete — P8 verified (36 tests) & committed; wired catalog+photo CLI; dispatched P9.
 
 ## 8. References
 
