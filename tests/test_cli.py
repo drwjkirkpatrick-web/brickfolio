@@ -44,11 +44,6 @@ def test_empty_inventory_lists_friendly_hint(tmp_path, capsys):
     assert "empty" in capsys.readouterr().out.lower()
 
 
-def test_stub_commands_report_pending(tmp_path, capsys):
-    assert run(tmp_path / "stub.db", "demo") == 0
-    assert capsys.readouterr().out.count("not implemented yet") == 1
-
-
 # ---- catalog (Prompt 2 wiring) ---------------------------------------------
 
 
@@ -394,3 +389,44 @@ def test_builds_recommend_verbose_missing(tmp_path, capsys):
     assert run(db_path, "builds", "recommend", "--verbose", "--top", "10") == 0
     out = capsys.readouterr().out
     assert "0%" in out and first.name in out and first_part in out
+
+
+# ---- demo + export (Prompt 10 wiring) -----------------------------------------
+
+
+def test_demo_runs_offline(tmp_path, capsys):
+    db_path = tmp_path / "demo.db"
+    assert run(db_path, "demo") == 0
+    out = capsys.readouterr().out
+    assert "READY" in out  # the scripted demo pile makes one build ready
+
+
+def test_demo_with_theme_uses_client(tmp_path, capsys, monkeypatch):
+    import brickfolio.cli as cli_mod
+
+    class FakeDemoClient:
+        def __init__(self, base_url=None, model=None, timeout=60, opener=None):
+            pass
+
+        def chat(self, messages, temperature=0.6):
+            # a part the demo pile cannot cover -> invalid generation, but
+            # the demo must still complete cleanly and print its summary
+            return "1 4 0 0 0 1 0 0 0 1 0 0 0 1 9999.dat"
+
+    monkeypatch.setattr(cli_mod, "ChatClient", FakeDemoClient)
+    assert run(tmp_path / "demo.db", "demo", "--theme", "a tiny car") == 0
+    assert "READY" in capsys.readouterr().out
+
+
+def test_inventory_export_csv(tmp_path, capsys):
+    db_path = tmp_path / "cli.db"
+    assert run(db_path, "inventory", "add", "3001", "0", "5") == 0
+    assert run(db_path, "inventory", "add", "3004", "4", "1") == 0
+    capsys.readouterr()
+
+    export_path = tmp_path / "parts.csv"
+    assert run(db_path, "inventory", "export", str(export_path)) == 0
+    assert "Exported 2 part line(s)" in capsys.readouterr().out
+    text = export_path.read_text()
+    assert text.startswith("part_num,color_id,quantity")
+    assert "3001,0,5" in text and "3004,4,1" in text

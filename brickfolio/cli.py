@@ -5,7 +5,7 @@ NOTE: Wiring plan — each later prompt gains its commands here:
   Prompts 3+5: builds list|search|show|recommend (list/search/show wired; recommend lands with P5)
   Prompts 6+7: photo identify|scan             (wired)
   Prompt 9:    generate                        (wired)
-  Prompt 10:   demo + export                   (pending)
+  Prompt 10:   demo + inventory export         (wired)
 This file is parent-owned (shared-file rule); subagents request wiring in
 their summaries instead of editing it.
 
@@ -24,6 +24,7 @@ from .generator import generate_build
 from .importer import import_catalog
 from .llm import ChatClient
 from .models import InventoryItem
+from .pipeline import export_rebrickable_csv, run_demo
 from .report import recommend_builds, render_recommendations
 from .vision.brickognize import BrickognizeError, identify_part
 from .vision.detector import DetectorError, ManualRegionsDetector, StaticDetector
@@ -59,6 +60,11 @@ def build_parser() -> argparse.ArgumentParser:
     rm_p.add_argument("part_num")
     rm_p.add_argument("color_id")
     rm_p.add_argument("quantity", type=int, nargs="?", default=1)
+
+    exp_p = inv_sub.add_parser(
+        "export", help="Export your collection as a Rebrickable part-list CSV"
+    )
+    exp_p.add_argument("path")
 
     # catalog (Prompt 2) --------------------------------------------------------
     cat = sub.add_parser("catalog", help="Import/query the Rebrickable catalog")
@@ -139,8 +145,18 @@ def build_parser() -> argparse.ArgumentParser:
         "--out", default=None, help="Write the generated LDraw model to this file"
     )
 
-    # stubs for later prompts -----------------------------------------------------
-    sub.add_parser("demo", help="Run the end-to-end demo (Prompt 10)")
+    # demo (Prompt 10) -------------------------------------------------------------
+    demo_p = sub.add_parser(
+        "demo", help="Run the offline end-to-end demo (fixtures, no network)"
+    )
+    demo_p.add_argument(
+        "--csv-dir", default=None,
+        help="Catalog CSV dir override (default: bundled fixtures)",
+    )
+    demo_p.add_argument(
+        "--theme", default=None,
+        help="Also generate a build for this theme (requires a local LLM endpoint)",
+    )
 
     return parser
 
@@ -170,6 +186,11 @@ def cmd_inventory(args, db: Database) -> int:
             f"Removed {args.quantity} x {args.part_num} (color {args.color_id}); "
             f"{remaining} remaining."
         )
+        return 0
+
+    if args.inventory_command == "export":
+        count = export_rebrickable_csv(db, args.path)
+        print(f"Exported {count} part line(s) to {args.path}.")
         return 0
 
     return 1  # unreachable; argparse enforces the subcommand
@@ -385,6 +406,16 @@ def cmd_generate(args, db: Database) -> int:
     return 0 if result.valid else 1
 
 
+def cmd_demo(args, db: Database) -> int:
+    # NOTE: run_demo opens its own Database from the path, scans a scripted
+    # fixture pile offline, and prints the stage-by-stage summary itself.
+    # A client is built only when --theme asks for generation; without it the
+    # demo stays fully offline.
+    client = ChatClient() if args.theme else None
+    run_demo(db.path, csv_dir=args.csv_dir, theme=args.theme, client=client)
+    return 0
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     args = build_parser().parse_args(argv)
     db = Database(args.db)
@@ -399,6 +430,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             return cmd_photo(args, db)
         if args.command == "generate":
             return cmd_generate(args, db)
+        if args.command == "demo":
+            return cmd_demo(args, db)
         print(f"'{args.command}' is not implemented yet — arrives in a later prompt.")
         return 0
     except ValueError as exc:
