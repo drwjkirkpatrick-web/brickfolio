@@ -1,0 +1,8 @@
+0 // clean_house.ldr - a tiny house that validates cleanly against its inventory
+0 // Type 2 and 3 lines exercise the "other line types are ignored" rule.
+2 24 -60 0 0 60 0 0
+1 4 -40 0 0 1 0 0 0 1 0 0 0 1 0 0 1 3001.dat
+1 4 40 0 0 1 0 0 0 1 0 0 0 1 0 0 1 3001.dat
+1 0 0 24 0 1 0 0 0 1 0 0 0 1 0 0 1 3003.dat
+1 4 0 0 -60 1 0 0 0 1 0 0 0 1 0 0 1 3005.dat
+3 0 -40 24 0 40 24 0 0 36 0
